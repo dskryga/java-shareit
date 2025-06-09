@@ -33,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(ItemDto itemDto, Long userId, Long itemId) {
-        if (itemDao.getOne(itemId).getOwner().getId() == userId) {
+        if (itemDao.getOne(itemId).getOwner().getId().equals(userId)) {
             Item itemToUpdate = itemDao.getOne(itemId);
             if (itemDto.getName() != null) {
                 itemToUpdate.setName(itemDto.getName());
