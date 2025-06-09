@@ -4,7 +4,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface UserService {
     Collection<User> getAll();

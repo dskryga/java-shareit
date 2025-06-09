@@ -14,7 +14,7 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
 
@@ -30,8 +30,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User create(UserDto userDto) {
-        if(userDao.isEmailExists(userDto.getEmail())) throw new ValidationException(
-                String.format("Email %s уже используется",userDto.getEmail()));
+        if (userDao.isEmailExists(userDto.getEmail())) throw new ValidationException(
+                String.format("Email %s уже используется", userDto.getEmail()));
         User userToCreate = UserMapper.mapToUser(userDto);
         return userDao.create(userToCreate);
     }
@@ -39,10 +39,10 @@ public class UserServiceImpl implements UserService{
     @Override
     public User update(UserDto userDto, Long id) {
         User origin = userDao.getOne(id);
-        if(userDao.isEmailExists(userDto.getEmail())) throw new ValidationException(
-                String.format("Email %s уже используется",userDto.getEmail()));
-        if(userDto.getName()!= null) origin.setName(userDto.getName());
-        if(userDto.getEmail()!=null) origin.setEmail(userDto.getEmail());
+        if (userDao.isEmailExists(userDto.getEmail())) throw new ValidationException(
+                String.format("Email %s уже используется", userDto.getEmail()));
+        if (userDto.getName() != null) origin.setName(userDto.getName());
+        if (userDto.getEmail() != null) origin.setEmail(userDto.getEmail());
         return userDao.update(origin);
     }
 
