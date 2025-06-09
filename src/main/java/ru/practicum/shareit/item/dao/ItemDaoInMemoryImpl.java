@@ -37,7 +37,7 @@ public class ItemDaoInMemoryImpl implements ItemDao {
     @Override
     public Collection<Item> getAllByOwner(Long userId) {
         return items.values().stream()
-                .filter(item -> item.getOwner().getId() == userId)
+                .filter(item -> item.getOwner().getId().equals(userId))
                 .collect(Collectors.toList());
     }
 
@@ -46,7 +46,7 @@ public class ItemDaoInMemoryImpl implements ItemDao {
         return items.values().stream()
                 .filter(item -> item.getName().toLowerCase().contains(text) ||
                         item.getDescription().toLowerCase().contains(text))
-                .filter(item -> item.getAvailable())
+                .filter(Item::getAvailable)
                 .collect(Collectors.toList());
     }
 
