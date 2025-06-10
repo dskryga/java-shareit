@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.item.dao.ItemDao;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ItemServiceImpl implements ItemService {
 
     private final ItemDao itemDao;
@@ -64,7 +62,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> getAllSearchedItems(String text) {
         if (text.isBlank()) return List.of();
-        log.info("Мы здесь, текст {}", text);
         text = text.trim().toLowerCase();
         return itemDao.getAllSearchedItems(text).stream()
                 .map(ItemMapper::mapToDto)
