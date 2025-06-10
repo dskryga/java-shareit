@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
@@ -19,28 +18,33 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public Item create(@RequestBody @Valid ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto create(@RequestBody @Valid ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Получен запрос от пользователся с id {} на создание вещи {}", userId, itemDto.getName());
         return itemService.create(itemDto, userId);
     }
 
     @GetMapping("{id}")
-    public Item getOne(@PathVariable Long id) {
+    public ItemDto getOne(@PathVariable Long id) {
+        log.info("Получен запрос на получение информации о вещи с id {}", id);
         return itemService.getOne(id);
     }
 
     @PatchMapping("{itemId}")
-    public Item update(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId,
-                       @PathVariable Long itemId) {
+    public ItemDto update(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId,
+                          @PathVariable Long itemId) {
+        log.info("Получен запрос от пользователя с id {} на изменение вещи с id {}", userId, itemId);
         return itemService.update(itemDto, userId, itemId);
     }
 
     @GetMapping
-    public Collection<Item> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDto> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Получен запрос от пользователя с id {} на получение информации о всех своих вещах", userId);
         return itemService.getAllByOwner(userId);
     }
 
     @GetMapping("/search")
-    public Collection<Item> getAllSearchedItems(@RequestParam String text) {
+    public Collection<ItemDto> getAllSearchedItems(@RequestParam String text) {
+        log.info("Получен запрос на поиск всех вещей по ключевым словам: {}", text);
         return itemService.getAllSearchedItems(text);
     }
 }

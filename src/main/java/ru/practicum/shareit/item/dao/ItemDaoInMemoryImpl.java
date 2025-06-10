@@ -30,8 +30,7 @@ public class ItemDaoInMemoryImpl implements ItemDao {
 
     @Override
     public Item update(Item item) {
-        items.replace(item.getId(), item);
-        return getOne(item.getId());
+        return items.replace(item.getId(), item);
     }
 
     @Override
@@ -44,9 +43,10 @@ public class ItemDaoInMemoryImpl implements ItemDao {
     @Override
     public Collection<Item> getAllSearchedItems(String text) {
         return items.values().stream()
+                .filter(item -> item.getAvailable() != null)
+                .filter(Item::getAvailable)
                 .filter(item -> item.getName().toLowerCase().contains(text) ||
                         item.getDescription().toLowerCase().contains(text))
-                .filter(Item::getAvailable)
                 .collect(Collectors.toList());
     }
 

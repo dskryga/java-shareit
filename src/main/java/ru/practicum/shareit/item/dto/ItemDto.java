@@ -6,9 +6,10 @@ import lombok.Data;
 
 @Data
 public class ItemDto {
+    private Long id;
     @NotBlank
     private String name;
-    @NotNull
+    @NotBlank
     private String description;
     @NotNull
     private Boolean available;

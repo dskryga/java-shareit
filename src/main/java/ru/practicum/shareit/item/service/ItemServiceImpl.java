@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.item.dao.ItemDao;
@@ -11,30 +12,32 @@ import ru.practicum.shareit.user.dao.UserDao;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ItemServiceImpl implements ItemService {
 
     private final ItemDao itemDao;
     private final UserDao userDao;
 
     @Override
-    public Item create(ItemDto itemDto, Long userId) {
+    public ItemDto create(ItemDto itemDto, Long userId) {
         Item itemToCreate = ItemMapper.mapToItem(itemDto);
         itemToCreate.setOwner(userDao.getOne(userId));
-        return itemDao.create(itemToCreate);
+        return ItemMapper.mapToDto(itemDao.create(itemToCreate));
     }
 
     @Override
-    public Item getOne(Long id) {
-        return itemDao.getOne(id);
+    public ItemDto getOne(Long id) {
+        return ItemMapper.mapToDto(itemDao.getOne(id));
     }
 
     @Override
-    public Item update(ItemDto itemDto, Long userId, Long itemId) {
-        if (itemDao.getOne(itemId).getOwner().getId().equals(userId)) {
-            Item itemToUpdate = itemDao.getOne(itemId);
+    public ItemDto update(ItemDto itemDto, Long userId, Long itemId) {
+        Item itemToUpdate = itemDao.getOne(itemId);
+        if (itemToUpdate.getOwner().getId().equals(userId)) {
             if (itemDto.getName() != null) {
                 itemToUpdate.setName(itemDto.getName());
             }
@@ -44,22 +47,27 @@ public class ItemServiceImpl implements ItemService {
             if (itemDto.getAvailable() != itemToUpdate.getAvailable()) {
                 itemToUpdate.setAvailable(itemDto.getAvailable());
             }
-            return itemDao.update(itemToUpdate);
+            return ItemMapper.mapToDto(itemDao.update(itemToUpdate));
         }
         throw new AccessDeniedException(String.format("Доступ на редактирование закрыт:" +
                 "Пользователь с id %d не является владельцем вещи с id %d", userId, itemId));
     }
 
     @Override
-    public Collection<Item> getAllByOwner(Long userId) {
+    public Collection<ItemDto> getAllByOwner(Long userId) {
         userDao.getOne(userId);
-        return itemDao.getAllByOwner(userId);
+        return itemDao.getAllByOwner(userId).stream()
+                .map(ItemMapper::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Item> getAllSearchedItems(String text) {
-        text = text.trim().toLowerCase();
+    public Collection<ItemDto> getAllSearchedItems(String text) {
         if (text.isBlank()) return List.of();
-        return itemDao.getAllSearchedItems(text);
+        log.info("Мы здесь, текст {}", text);
+        text = text.trim().toLowerCase();
+        return itemDao.getAllSearchedItems(text).stream()
+                .map(ItemMapper::mapToDto)
+                .collect(Collectors.toList());
     }
 }
