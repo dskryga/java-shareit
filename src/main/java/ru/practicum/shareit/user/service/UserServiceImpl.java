@@ -2,11 +2,13 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -16,41 +18,42 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
+    private final UserRepository userRepository;
 
-    @Override
+
     public Collection<UserDto> getAll() {
-        return userDao.getAll().stream()
+        return userRepository.findAll().stream()
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
     public UserDto getOne(Long id) {
-        return UserMapper.mapToUserDto(userDao.getOne(id));
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        return UserMapper.mapToUserDto(user);
     }
 
-    @Override
     public UserDto create(UserDto userDto) {
-        if (userDao.isEmailExists(userDto.getEmail())) throw new ValidationException(
-                String.format("Email %s уже используется", userDto.getEmail()));
+        //сделать проверку на уникальность емаил
         User userToCreate = UserMapper.mapToUser(userDto);
-        return UserMapper.mapToUserDto(userDao.create(userToCreate));
+        return UserMapper.mapToUserDto(userRepository.save(userToCreate));
     }
 
-    @Override
     public UserDto update(UserDto userDto, Long id) {
-        User origin = userDao.getOne(id);
-        if (userDao.isEmailExists(userDto.getEmail()) &&
+        User origin = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        if (userRepository.existsByEmail(userDto.getEmail()) &&
                 !userDto.getEmail().equals(origin.getEmail()))
             throw new ValidationException(
                     String.format("Email %s уже используется другим пользователем", userDto.getEmail()));
         if (userDto.getName() != null) origin.setName(userDto.getName());
         if (userDto.getEmail() != null) origin.setEmail(userDto.getEmail());
-        return UserMapper.mapToUserDto(userDao.update(origin));
+        User updatedUser = userRepository.save(origin);
+        return UserMapper.mapToUserDto(updatedUser);
     }
 
-    @Override
     public void delete(Long id) {
-        userDao.delete(id);
+        userRepository.deleteById(id);
     }
+
 }
