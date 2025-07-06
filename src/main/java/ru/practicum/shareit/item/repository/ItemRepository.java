@@ -7,7 +7,8 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.Collection;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item,Long> {
+public interface ItemRepository extends JpaRepository<Item, Long> {
     Collection<Item> findAllByOwnerId(Long ownerId);
+
     Collection<Item> findByNameContainingIgnoreCaseAndAvailableTrue(String text);
 }

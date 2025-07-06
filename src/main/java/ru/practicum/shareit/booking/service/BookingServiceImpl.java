@@ -61,8 +61,8 @@ public class BookingServiceImpl implements BookingService {
         if (userId.equals(bookerId) || userId.equals(itemOwnerId)) {
             return BookingMapper.mapToBookingResponseDto(booking);
         }
-        throw new AccessDeniedException(String.format
-                ("Информация о бронировании с id %d недоступна для пользователя с id %d", bookingId, userId));
+        throw new AccessDeniedException(String.format("Информация о бронировании с id %d недоступна" +
+                " для пользователя с id %d", bookingId, userId));
     }
 
     @Override
@@ -77,8 +77,8 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
             return BookingMapper.mapToBookingResponseDto(bookingRepository.save(booking));
         }
-        throw new AccessDeniedException(String.format
-                ("Информация о бронировании с id %d недоступна для пользователя с id %d", bookingId, userId));
+        throw new AccessDeniedException(String.format("Информация о бронировании с id %d недоступна" +
+                " для пользователя с id %d", bookingId, userId));
     }
 
     @Override

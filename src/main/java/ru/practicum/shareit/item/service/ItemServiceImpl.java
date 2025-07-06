@@ -127,8 +127,8 @@ public class ItemServiceImpl implements ItemService {
                 new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
 
         Collection<Booking> bookingList = bookingRepository.findCompletedApprovedBookingsForUserAndItem(itemId, userId);
-        if (bookingList.isEmpty()) throw new ValidationException(String.format
-                ("Для пользователя с id %d не найдено бронирований вещи с id %d", userId, itemId));
+        if (bookingList.isEmpty()) throw new ValidationException(String.format("Для пользователя с id %d" +
+                " не найдено бронирований вещи с id %d", userId, itemId));
 
         Comment comment = CommentMapper.mapToComment(commentRequestDto);
         comment.setAuthor(user);
