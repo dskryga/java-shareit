@@ -39,8 +39,7 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDto create(ItemDto itemDto, Long userId) {
 
-        userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        getUserOrThrow(userId);
 
         Item itemToCreate = ItemMapper.mapToItem(itemDto);
         itemToCreate.setOwnerId(userId);
@@ -49,8 +48,7 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDtoWithBookings getOne(Long id) {
 
-        Item item = itemRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Вещь с id %d не найдена", id)));
+        Item item = getItemOrThrow(id);
 
         /*Пришлось вставить этот костыль с минус три секунды от now()
                 как я понял приложение считает бронирование завершённым (end < now) и возвращает его как lastBooking
@@ -81,8 +79,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto update(ItemDto itemDto, Long userId, Long itemId) {
-        Item itemToUpdate = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        Item itemToUpdate = getItemOrThrow(itemId);
 
         if (itemToUpdate.getOwnerId().equals(userId)) {
             if (itemDto.getName() != null) {
@@ -100,17 +97,32 @@ public class ItemServiceImpl implements ItemService {
                 "Пользователь с id %d не является владельцем вещи с id %d", userId, itemId));
     }
 
-    public Collection<ItemDto> getAllByOwner(Long userId) {
-        userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+    public Collection<ItemDtoWithBookings> getAllByOwner(Long userId) {
+        getUserOrThrow(userId);
 
         return itemRepository.findAllByOwnerId(userId).stream()
-                .map(ItemMapper::mapToDto)
+                .map(ItemMapper::mapToDtoWithBooking)
+                .map(itemDtoWithBookings -> {
+                    Long id = itemDtoWithBookings.getId();
+                    Booking lastBooking = bookingRepository.findTopByItemIdAndEndTimeBeforeAndStatusOrderByEndTimeDesc(id,
+                            LocalDateTime.now().minusSeconds(3), BookingStatus.APPROVED
+                    ).orElse(null);
+
+                    Booking nextBooking = bookingRepository.findTopByItemIdAndEndTimeAfterAndStatusOrderByEndTimeAsc(id,
+                            LocalDateTime.now(), BookingStatus.APPROVED
+                    ).orElse(null);
+
+                    BookingDtoForItem last = lastBooking == null ? null : BookingMapper.mapToBookingDtoForItem(lastBooking);
+                    BookingDtoForItem next = nextBooking == null ? null : BookingMapper.mapToBookingDtoForItem(nextBooking);
+                    itemDtoWithBookings.setNextBooking(next);
+                    itemDtoWithBookings.setLastBooking(last);
+                    return itemDtoWithBookings;
+                })
                 .collect(Collectors.toList());
     }
 
     public Collection<ItemDto> getAllSearchedItems(String text) {
-        if (text.isBlank() || text == null) return List.of();
+        if (text == null || text.isBlank()) return List.of();
         text = text.trim().toLowerCase();
 
         return itemRepository.findByNameContainingIgnoreCaseAndAvailableTrue(text).stream()
@@ -120,11 +132,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentResponseDto createComment(Long userId, Long itemId, CommentRequestDto commentRequestDto) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        User user = getUserOrThrow(userId);
 
-        Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        Item item = getItemOrThrow(itemId);
 
         Collection<Booking> bookingList = bookingRepository.findCompletedApprovedBookingsForUserAndItem(itemId, userId);
         if (bookingList.isEmpty()) throw new ValidationException(String.format("Для пользователя с id %d" +
@@ -136,5 +146,15 @@ public class ItemServiceImpl implements ItemService {
 
         Comment created = commentRepository.save(comment);
         return CommentMapper.mapToCommentResponseDto(created);
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+    }
+
+    private Item getItemOrThrow(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
     }
 }

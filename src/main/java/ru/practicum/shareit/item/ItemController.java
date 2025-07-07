@@ -40,7 +40,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDtoWithBookings> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен запрос от пользователя с id {} на получение информации о всех своих вещах", userId);
         return itemService.getAllByOwner(userId);
     }

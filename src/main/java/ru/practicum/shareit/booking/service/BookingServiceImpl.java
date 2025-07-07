@@ -30,15 +30,17 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto create(BookingDto bookingDto, Long userId) {
-        User booker = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        User booker = getUserOrThrow(userId);
 
-        Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
-                new NotFoundException(String.format("Вещь с id %d не найдена", bookingDto.getItemId())));
+        Item item = getItemOrThrow(bookingDto.getItemId());
 
         if (!item.getAvailable())
             throw new ValidationException(String.format("Вещь с id %d недоступна для бронирования",
                     item.getId()));
+
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()))
+            throw new ValidationException(String.format("Время начала" +
+                    " бронирования не может быть позже времени конца"));
 
         Booking booking = BookingMapper.mapToBooking(bookingDto);
         booking.setBooker(booker);
@@ -49,11 +51,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingById(Long bookingId, Long userId) {
 
-        userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        getUserOrThrow(userId);
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+        Booking booking = getBookingOrThrow(bookingId);
 
         Long bookerId = booking.getBooker().getId();
         Long itemOwnerId = booking.getItem().getOwnerId();
@@ -67,13 +67,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto aprroveBooking(Long bookingId, Long userId, boolean approved) {
-        userRepository.findById(userId).orElseThrow(() ->
-                new AccessDeniedException(String.format("Пользователь с id %d не найден", userId)));
+        getUserOrThrow(userId);
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+        Booking booking = getBookingOrThrow(bookingId);
 
         if (userId.equals(booking.getItem().getOwnerId())) {
+            if (booking.getStatus() != BookingStatus.WAITING)
+                throw new ValidationException("Статус бронирования не WAITING");
             booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
             return BookingMapper.mapToBookingResponseDto(bookingRepository.save(booking));
         }
@@ -83,8 +83,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingResponseDto> findByBookerAndState(Long userId, BookingState bookingState) {
-        userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        getUserOrThrow(userId);
         return bookingRepository.findByBookerAndState(userId, bookingState.name()).stream()
                 .map(BookingMapper::mapToBookingResponseDto)
                 .collect(Collectors.toList());
@@ -92,10 +91,24 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingResponseDto> findByOwnerAndState(Long userId, BookingState bookingState) {
-        userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        getUserOrThrow(userId);
         return bookingRepository.findByOwnerAndState(userId, bookingState.name()).stream()
                 .map(BookingMapper::mapToBookingResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
+    }
+
+    private Item getItemOrThrow(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+    }
+
+    private Booking getBookingOrThrow(Long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
     }
 }

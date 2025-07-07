@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingDto {
-    private Long id;
     @NotNull
     private Long itemId;
     @NotNull
@@ -23,5 +22,5 @@ public class BookingDto {
     @NotNull
     @Future
     private LocalDateTime end;
-    private BookingStatus status;
+    private BookingStatus status = BookingStatus.WAITING;
 }

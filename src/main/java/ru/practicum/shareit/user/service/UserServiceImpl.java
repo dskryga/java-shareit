@@ -28,20 +28,17 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto getOne(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        User user = getUserOrThrow(id);
         return UserMapper.mapToUserDto(user);
     }
 
     public UserDto create(UserDto userDto) {
-        //сделать проверку на уникальность емаил
         User userToCreate = UserMapper.mapToUser(userDto);
         return UserMapper.mapToUserDto(userRepository.save(userToCreate));
     }
 
     public UserDto update(UserDto userDto, Long id) {
-        User origin = userRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Пользователь с id %d не найден", id)));
+        User origin = getUserOrThrow(id);
         if (userRepository.existsByEmail(userDto.getEmail()) &&
                 !userDto.getEmail().equals(origin.getEmail()))
             throw new ValidationException(
@@ -54,6 +51,11 @@ public class UserServiceImpl implements UserService {
 
     public void delete(Long id) {
         userRepository.deleteById(id);
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с id %d не найден", userId)));
     }
 
 }
