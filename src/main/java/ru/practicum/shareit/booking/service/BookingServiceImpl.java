@@ -67,7 +67,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto aprroveBooking(Long bookingId, Long userId, boolean approved) {
-        getUserOrThrow(userId);
+        // Здесь пришлось оставить без внутреннего метода т.к. постман тест требует код 403,
+        // приходится выбрасывать другое исключение
+        userRepository.findById(userId).orElseThrow(() ->
+                new AccessDeniedException(String.format("Пользователь с id %d не найден", userId)));
 
         Booking booking = getBookingOrThrow(bookingId);
 
