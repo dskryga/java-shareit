@@ -22,7 +22,7 @@ public class CommentResponseDto {
         this.id = id;
         this.text = text;
         this.authorName = authorName;
-        this.itemId=itemId;
+        this.itemId = itemId;
         created = LocalDateTime.now();
     }
 }

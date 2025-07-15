@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -43,7 +42,7 @@ class BookingControllerTest {
     private final BookingDto bookingDto = new BookingDto(
             1L,
             LocalDateTime.now().plusDays(1),
-            LocalDateTime.now().plusDays(2),BookingStatus.WAITING);
+            LocalDateTime.now().plusDays(2), BookingStatus.WAITING);
     private final BookingResponseDto bookingResponseDto = new BookingResponseDto(
             1L,
             LocalDateTime.now().plusDays(1),

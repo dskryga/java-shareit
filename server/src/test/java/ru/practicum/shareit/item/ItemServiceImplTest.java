@@ -7,20 +7,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingDtoForItem;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.AccessDeniedException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.mapper.CommentMapper;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -60,7 +55,7 @@ class ItemServiceImplTest {
             LocalDateTime.now().minusDays(1), item, user, BookingStatus.APPROVED);
     private final Comment comment = new Comment(1L, "Comment text", item, user, LocalDateTime.now());
     private final CommentRequestDto commentRequestDto = new CommentRequestDto("Comment text");
-    private final CommentResponseDto commentResponseDto = new CommentResponseDto(1L, "Comment text", "User",null);
+    private final CommentResponseDto commentResponseDto = new CommentResponseDto(1L, "Comment text", "User", null);
 
     @Test
     void createItem_ShouldReturnItemDto() {

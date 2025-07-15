@@ -7,13 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
-import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -47,7 +45,7 @@ class ItemRequestServiceImplTest {
     private final ItemRequestDto requestDto = new ItemRequestDto("Need a drill");
     private final ItemRequest request = new ItemRequest(1L, "Need a drill", user, LocalDateTime.now());
     private final ItemRequestResponseDto responseDto = new ItemRequestResponseDto(
-            1L, "Need a drill",1L, LocalDateTime.now(), Collections.emptyList());
+            1L, "Need a drill", 1L, LocalDateTime.now(), Collections.emptyList());
     private final Item item = new Item(1L, "Drill", "Powerful drill", true, user.getId(), request.getId());
     private final ItemDto itemDto = new ItemDto(1L, "Drill", "Powerful drill", true, request.getId());
 
