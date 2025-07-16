@@ -38,10 +38,6 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException(String.format("Вещь с id %d недоступна для бронирования",
                     item.getId()));
 
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd()))
-            throw new ValidationException(String.format("Время начала" +
-                    " бронирования не может быть позже времени конца"));
-
         Booking booking = BookingMapper.mapToBooking(bookingDto);
         booking.setBooker(booker);
         booking.setItem(item);

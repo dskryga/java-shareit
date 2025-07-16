@@ -20,6 +20,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -38,11 +40,14 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     public ItemDto create(ItemDto itemDto, Long userId) {
 
         getUserOrThrow(userId);
-
+        if (itemDto.getRequestId() != null) {
+            getRequestOrThrow(itemDto.getRequestId());
+        }
         Item itemToCreate = ItemMapper.mapToItem(itemDto);
         itemToCreate.setOwnerId(userId);
         return ItemMapper.mapToDto(itemRepository.save(itemToCreate));
@@ -126,8 +131,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public Collection<ItemDto> getAllSearchedItems(String text) {
-        if (text == null || text.isBlank()) return List.of();
-        text = text.trim().toLowerCase();
 
         return itemRepository.findByNameContainingIgnoreCaseAndAvailableTrue(text).stream()
                 .map(ItemMapper::mapToDto)
@@ -160,6 +163,11 @@ public class ItemServiceImpl implements ItemService {
     private Item getItemOrThrow(Long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() ->
                 new NotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+    }
+
+    private ItemRequest getRequestOrThrow(Long requestId) {
+        return itemRequestRepository.findById(requestId).orElseThrow(() ->
+                new NotFoundException(String.format("Запрос с id {} не найден", requestId)));
     }
 
     private void setLastAndNextBookings(ItemDtoWithBookings dto, List<Booking> bookings) {

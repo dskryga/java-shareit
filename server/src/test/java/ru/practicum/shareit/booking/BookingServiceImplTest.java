@@ -122,16 +122,6 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void create_shouldThrowValidationExceptionWhenStartAfterEnd() {
-        bookingDto.setStart(LocalDateTime.now().plusHours(2));
-        bookingDto.setEnd(LocalDateTime.now().plusHours(1));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-
-        assertThrows(ValidationException.class, () -> bookingService.create(bookingDto, user.getId()));
-    }
-
-    @Test
     void getBookingById_shouldReturnBooking() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));

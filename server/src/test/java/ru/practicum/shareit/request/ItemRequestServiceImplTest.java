@@ -101,6 +101,7 @@ class ItemRequestServiceImplTest {
     void getAllRequests_ShouldReturnOtherUsersRequests() {
         when(itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(anyLong()))
                 .thenReturn(List.of(request));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
         List<ItemRequestResponseDto> result = itemRequestService.getAllRequests(2L);
 

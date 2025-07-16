@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.exception.ValidationException;
 
 
 @RestController
@@ -22,6 +23,9 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestBody @Valid BookingDto bookingDto) {
         log.info("Gateway: Создание бронирования от пользователя с ID {}", userId);
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()))
+            throw new ValidationException(String.format("Время начала" +
+                    " бронирования не может быть позже времени конца"));
         return bookingClient.bookItem(userId, bookingDto);
     }
 

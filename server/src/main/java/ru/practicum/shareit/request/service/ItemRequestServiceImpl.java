@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = ItemRequestMapper.mapToItemRequest(itemRequestDto);
         User requestor = getUserOrThrow(userId);
         itemRequest.setRequestor(requestor);
-        itemRequest.setCreated(LocalDateTime.now());
         return ItemRequestMapper.mapToItemRequestResponseDto(itemRequestRepository.save(itemRequest));
     }
 
@@ -62,6 +60,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestResponseDto> getAllRequests(Long userId) {
+        getUserOrThrow(userId);
         return itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(userId).stream()
                 .map(ItemRequestMapper::mapToItemRequestResponseDto)
                 .collect(Collectors.toList());

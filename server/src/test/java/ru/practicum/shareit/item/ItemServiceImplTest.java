@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -45,6 +47,9 @@ class ItemServiceImplTest {
     @Mock
     private CommentRepository commentRepository;
 
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
+
     @InjectMocks
     private ItemServiceImpl itemService;
 
@@ -56,11 +61,13 @@ class ItemServiceImplTest {
     private final Comment comment = new Comment(1L, "Comment text", item, user, LocalDateTime.now());
     private final CommentRequestDto commentRequestDto = new CommentRequestDto("Comment text");
     private final CommentResponseDto commentResponseDto = new CommentResponseDto(1L, "Comment text", "User", null);
+    private final ItemRequest itemRequest = new ItemRequest(1L, "need a drill", user, LocalDateTime.now());
 
     @Test
     void createItem_ShouldReturnItemDto() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.of(itemRequest));
 
         ItemDto result = itemService.create(itemDto, 1L);
 
